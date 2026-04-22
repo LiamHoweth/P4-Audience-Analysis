@@ -1221,8 +1221,8 @@ function SurveyApp() {
               />
               {!CHARTS_READY ? (
                 <div className="rounded-2xl border border-line bg-panel/70 px-4 py-3 text-sm text-mist">
-                  Charts could not load because a script dependency was blocked.
-                  Please disable content blockers for this page or try another browser.
+                  Charts could not load. Try a hard refresh. If this persists, your
+                  network may be blocking JavaScript—try another network or browser.
                 </div>
               ) : null}
               {responses.length === 0 ? (
