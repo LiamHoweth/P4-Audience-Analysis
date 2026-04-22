@@ -402,6 +402,13 @@ function rowTotal(row, colOrder) {
   return colOrder.reduce((s, c) => s + (row[c] || 0), 0);
 }
 
+function truncateText(str, maxLen) {
+  if (str == null) return "";
+  const s = String(str);
+  if (s.length <= maxLen) return s;
+  return `${s.slice(0, Math.max(1, maxLen - 1))}…`;
+}
+
 function topCellPercent(rows, rowQ, rowOrder, colQ, colOrder) {
   const matrix = crossTab(rows, rowQ, rowOrder, colQ, colOrder);
   let best = null;
@@ -728,13 +735,135 @@ function DonutBlock({ title, data }) {
   );
 }
 
-function StackedCorrelationCard({ title, subtitle, insight, matrix, colOrder, stackId }) {
+function CorrelationTooltip({ active, label, payload, matrix, colOrder, grouped }) {
+  if (!active || label == null || !payload?.length) return null;
+  const row = matrix.find((r) => r.name === label);
+  if (!row) return null;
+  const total = rowTotal(row, colOrder);
+  const items = payload.filter(
+    (p) => p && colOrder.includes(String(p.dataKey)),
+  );
+  return (
+    <div
+      style={{
+        background: tooltipStyles.contentStyle.background,
+        border: tooltipStyles.contentStyle.border,
+        borderRadius: tooltipStyles.contentStyle.borderRadius,
+        color: tooltipStyles.contentStyle.color,
+        fontFamily: tooltipStyles.contentStyle.fontFamily,
+        padding: "10px 12px",
+        maxWidth: 380,
+      }}
+    >
+      <p className="mb-1 text-sm font-semibold text-snow">{label}</p>
+      <p className="mb-2 font-mono text-[11px] text-mist">
+        People in this row: {total}
+      </p>
+      <ul className="space-y-1.5 text-xs">
+        {items.map((p) => {
+          const key = String(p.dataKey);
+          const raw = row[key] || 0;
+          const pctRow = total ? Math.round((raw / total) * 100) : 0;
+          return (
+            <li key={key} className="flex flex-col gap-0.5 border-t border-line/60 pt-1.5 first:border-t-0 first:pt-0">
+              <span className="text-[11px] leading-snug text-mist">{key}</span>
+              <span className="font-mono text-[12px] text-snow">
+                {raw} response{raw === 1 ? "" : "s"} ({pctRow}% of this row)
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      {!grouped ? (
+        <p className="mt-2 text-[10px] leading-snug text-mist">
+          Bar heights above are scaled to 100% within this row so you can compare the mix
+          fairly when row sizes differ.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function CrosstabMiniHeatmap({ matrix, colOrder }) {
+  const maxCell = Math.max(
+    1,
+    ...matrix.flatMap((row) => colOrder.map((c) => row[c] || 0)),
+  );
+  return (
+    <div className="mt-5">
+      <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-accent">
+        Heat map · same numbers, different view
+      </p>
+      <div className="overflow-x-auto rounded-xl border border-line bg-ink/40 p-2">
+        <div
+          className="grid min-w-[280px] gap-px bg-line/80 p-px"
+          style={{
+            gridTemplateColumns: `minmax(96px,1.15fr) repeat(${colOrder.length}, minmax(56px,1fr))`,
+          }}
+        >
+          <div className="bg-panel" />
+          {colOrder.map((c) => (
+            <div
+              key={c}
+              className="bg-panel px-1 py-2 text-left text-[10px] leading-tight text-mist md:text-[11px]"
+              title={c}
+            >
+              {truncateText(c, 44)}
+            </div>
+          ))}
+          {matrix.map((row) => (
+            <React.Fragment key={row.name}>
+              <div
+                className="bg-panel px-2 py-2 text-left text-[11px] text-snow"
+                title={row.name}
+              >
+                {truncateText(row.name, 48)}
+              </div>
+              {colOrder.map((c) => {
+                const n = row[c] || 0;
+                const inten = n / maxCell;
+                return (
+                  <div
+                    key={c}
+                    className="flex items-center justify-center px-1 py-2 font-mono text-[11px] md:text-xs"
+                    style={{
+                      backgroundColor: `rgba(0, 212, 170, ${0.06 + inten * 0.82})`,
+                      color: inten > 0.42 ? "#0c1018" : "#e8ecf4",
+                    }}
+                    title={`${n} in this combo`}
+                  >
+                    {n}
+                  </div>
+                );
+              })}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+      <p className="mt-2 text-[11px] leading-relaxed text-mist">
+        Darker cells mean more people picked that exact pairing. Use this with the bars:
+        bars show the split within each row; the grid highlights the busiest cells overall.
+      </p>
+    </div>
+  );
+}
+
+function CorrelationCard({ title, subtitle, insight, matrix, colOrder, stackId }) {
+  const grouped = colOrder.length <= 2;
+  const chartHeight = grouped ? 280 : 320;
+  const marginBottom = grouped ? 88 : 132;
+
   return (
     <div className="rounded-2xl border border-line bg-panel/80 p-5 shadow-glow backdrop-blur">
       <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <h4 className="text-base font-semibold text-snow">{title}</h4>
           <p className="mt-1 max-w-3xl text-sm text-mist">{subtitle}</p>
+          <p className="mt-2 max-w-3xl text-xs leading-relaxed text-mist">
+            {grouped
+              ? "Side-by-side bars use raw counts so you can see both how big each group is and how opinions split."
+              : "Bars are scaled to 100% within each row so a row with fewer people does not look visually smaller than a row with more people."}
+          </p>
         </div>
       </div>
       <div className="mb-4 rounded-xl border border-accent/20 bg-ink/60 px-4 py-3 text-sm text-snow">
@@ -743,34 +872,75 @@ function StackedCorrelationCard({ title, subtitle, insight, matrix, colOrder, st
         </span>
         <p className="mt-2 leading-relaxed">{insight}</p>
       </div>
-      <div className="h-72 w-full">
+      <div style={{ height: chartHeight }} className="w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={matrix} margin={{ top: 8, right: 8, left: 8, bottom: 96 }}>
+          <BarChart
+            data={matrix}
+            margin={{ top: 8, right: 12, left: 4, bottom: marginBottom }}
+            stackOffset={grouped ? undefined : "expand"}
+            barCategoryGap={grouped ? "18%" : "12%"}
+          >
             <CartesianGrid strokeDasharray="3 6" stroke="#1e2636" vertical={false} />
             <XAxis
               dataKey="name"
               stroke="#8b93a7"
-              tick={{ fill: "#b6bac5", fontSize: 11, fontFamily: "JetBrains Mono" }}
+              tick={{
+                fill: "#b6bac5",
+                fontSize: 10,
+                fontFamily: "JetBrains Mono, ui-monospace, monospace",
+              }}
+              interval={0}
+              angle={-12}
+              textAnchor="end"
+              height={56}
             />
             <YAxis
               stroke="#8b93a7"
               tick={{ fill: "#b6bac5", fontSize: 11, fontFamily: "JetBrains Mono" }}
-              allowDecimals={false}
+              allowDecimals={grouped}
+              domain={grouped ? [0, "auto"] : [0, 1]}
+              tickFormatter={
+                grouped ? undefined : (v) => `${Math.round(Number(v) * 100)}%`
+              }
             />
-            <Tooltip {...tooltipStyles} />
-            <Legend wrapperStyle={{ color: "#b6bac5", fontSize: 12 }} />
+            <Tooltip
+              content={(tooltipProps) => (
+                <CorrelationTooltip
+                  {...tooltipProps}
+                  matrix={matrix}
+                  colOrder={colOrder}
+                  grouped={grouped}
+                />
+              )}
+            />
+            <Legend
+              formatter={(value) => truncateText(String(value), 36)}
+              wrapperStyle={{
+                color: "#b6bac5",
+                fontSize: 11,
+                lineHeight: "14px",
+                paddingTop: 8,
+              }}
+            />
             {colOrder.map((col, idx) => (
               <Bar
                 key={col}
                 dataKey={col}
-                stackId={stackId}
+                stackId={grouped ? undefined : stackId}
                 fill={CHART_PALETTE[idx % CHART_PALETTE.length]}
-                radius={idx === colOrder.length - 1 ? [6, 6, 0, 0] : [0, 0, 0, 0]}
+                radius={
+                  grouped
+                    ? [6, 6, 0, 0]
+                    : idx === colOrder.length - 1
+                      ? [6, 6, 0, 0]
+                      : [0, 0, 0, 0]
+                }
               />
             ))}
           </BarChart>
         </ResponsiveContainer>
       </div>
+      <CrosstabMiniHeatmap matrix={matrix} colOrder={colOrder} />
     </div>
   );
 }
@@ -1262,7 +1432,7 @@ function SurveyApp() {
               />
               {CHARTS_READY ? (
               <div className="grid gap-8">
-                <StackedCorrelationCard
+                <CorrelationCard
                   stackId="pair-q2-q6"
                   title="Usage frequency vs. stance on government rules"
                   subtitle="Does how often you use these tools affect how you feel about government rules?"
@@ -1270,7 +1440,7 @@ function SurveyApp() {
                   matrix={pair26.matrix}
                   colOrder={pair26.colOrder}
                 />
-                <StackedCorrelationCard
+                <CorrelationCard
                   stackId="pair-q3-q10"
                   title="Risk level vs. trusting companies to self-police"
                   subtitle="Does seeing more risk line up with trusting big companies to police themselves?"
@@ -1278,7 +1448,7 @@ function SurveyApp() {
                   matrix={pair310.matrix}
                   colOrder={pair310.colOrder}
                 />
-                <StackedCorrelationCard
+                <CorrelationCard
                   stackId="pair-q7-q11"
                   title="Rules slowing innovation vs. rules and creativity"
                   subtitle="Are people consistent about rules slowing progress and how rules relate to innovation?"
@@ -1286,7 +1456,7 @@ function SurveyApp() {
                   matrix={pair711.matrix}
                   colOrder={pair711.colOrder}
                 />
-                <StackedCorrelationCard
+                <CorrelationCard
                   stackId="pair-q1-q8"
                   title="Knowledge of the debate vs. trust after government review"
                   subtitle="Does knowing more about the debate change whether a safety review would affect trust?"
