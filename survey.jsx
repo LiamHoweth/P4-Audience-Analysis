@@ -447,7 +447,7 @@ function insightPair26(rows) {
     };
   }
   return {
-    text: `${p}% of people who use these tools every day picked this stance: "${target}".`,
+    text: `${p}% of people who use these tools every day chose: "${target}".`,
     matrix: crossTab(rows, "q2", rowOrder, "q6", colOrder),
     rowOrder,
     colOrder,
@@ -506,7 +506,7 @@ function insightPair711(rows) {
     };
   }
   return {
-    text: `${p}% of people who agree rules slow innovation also picked answers that treat rules as a drag on progress (at least sometimes).`,
+    text: `${p}% of people who said rules slow innovation also chose an answer that describes rules as slowing or limiting progress.`,
     matrix: crossTab(rows, "q7", rowOrder, "q11", colOrder),
     rowOrder,
     colOrder,
@@ -549,7 +549,7 @@ function insightPair18(rows) {
 function buildTakeaways(rows) {
   if (!rows.length) {
     return [
-      "Once answers start coming in, this section will highlight the clearest patterns in plain language.",
+      "Summary lines will appear here after there are responses.",
     ];
   }
   const n = rows.length;
@@ -572,7 +572,7 @@ function buildTakeaways(rows) {
     QUESTIONS.find((q) => q.id === "q6").options,
   );
   bullets.push(
-    `The most common stance on government rules was: "${q6.label}" (${q6.p}% of people).`,
+    `Most common answer about government rules for AI: "${q6.label}" (${q6.p}% of respondents).`,
   );
 
   const q5 = top(
@@ -580,17 +580,17 @@ function buildTakeaways(rows) {
     QUESTIONS.find((q) => q.id === "q5").options,
   );
   bullets.push(
-    `The top pick for who should keep things safe was: "${q5.label}" (${q5.p}% of people).`,
+    `Most common choice for who should help keep AI safe: "${q5.label}" (${q5.p}% of respondents).`,
   );
 
   const false10 = rows.filter((r) => r.q10 === "False").length;
   bullets.push(
-    `${pct(false10, n)}% of people said big tech companies cannot be trusted to police themselves without government involvement.`,
+    `${pct(false10, n)}% of respondents disagreed that large tech companies can be trusted to police themselves without government involvement.`,
   );
 
   const true12 = rows.filter((r) => r.q12 === "True").length;
   bullets.push(
-    `${pct(true12, n)}% of people agreed that companies should pass safety checks before releasing these products to the public.`,
+    `${pct(true12, n)}% of respondents agreed that companies should pass safety checks before releasing AI products to the public.`,
   );
 
   const q8 = top(
@@ -598,7 +598,7 @@ function buildTakeaways(rows) {
     QUESTIONS.find((q) => q.id === "q8").options,
   );
   bullets.push(
-    `On government safety review and trust, the most common answer was: "${q8.label}" (${q8.p}% of people).`,
+    `Most common answer about government safety review and trust: "${q8.label}" (${q8.p}% of respondents).`,
   );
 
   return bullets.slice(0, 4);
@@ -757,7 +757,7 @@ function CorrelationTooltip({ active, label, payload, matrix, colOrder, grouped 
     >
       <p className="mb-1 text-sm font-semibold text-snow">{label}</p>
       <p className="mb-2 font-mono text-[11px] text-mist">
-        People in this row: {total}
+        Respondents in this row: {total}
       </p>
       <ul className="space-y-1.5 text-xs">
         {items.map((p) => {
@@ -774,12 +774,6 @@ function CorrelationTooltip({ active, label, payload, matrix, colOrder, grouped 
           );
         })}
       </ul>
-      {!grouped ? (
-        <p className="mt-2 text-[10px] leading-snug text-mist">
-          Bar heights above are scaled to 100% within this row so you can compare the mix
-          fairly when row sizes differ.
-        </p>
-      ) : null}
     </div>
   );
 }
@@ -791,9 +785,6 @@ function CrosstabMiniHeatmap({ matrix, colOrder }) {
   );
   return (
     <div className="mt-5">
-      <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-accent">
-        Heat map · same numbers, different view
-      </p>
       <div className="overflow-x-auto rounded-xl border border-line bg-ink/40 p-2">
         <div
           className="grid min-w-[280px] gap-px bg-line/80 p-px"
@@ -841,8 +832,7 @@ function CrosstabMiniHeatmap({ matrix, colOrder }) {
         </div>
       </div>
       <p className="mt-2 text-[11px] leading-relaxed text-mist">
-        Darker cells mean more people picked that exact pairing. Use this with the bars:
-        bars show the split within each row; the grid highlights the busiest cells overall.
+        Each cell is a count for that combination. Darker shading means a higher count.
       </p>
     </div>
   );
@@ -861,16 +851,13 @@ function CorrelationCard({ title, subtitle, insight, matrix, colOrder, stackId }
           <p className="mt-1 max-w-3xl text-sm text-mist">{subtitle}</p>
           <p className="mt-2 max-w-3xl text-xs leading-relaxed text-mist">
             {grouped
-              ? "Side-by-side bars use raw counts so you can see both how big each group is and how opinions split."
-              : "Bars are scaled to 100% within each row so a row with fewer people does not look visually smaller than a row with more people."}
+              ? "Bars show raw counts for each row."
+              : "Within each row, segments show percents that add up to 100%."}
           </p>
         </div>
       </div>
       <div className="mb-4 rounded-xl border border-accent/20 bg-ink/60 px-4 py-3 text-sm text-snow">
-        <span className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
-          Quick read
-        </span>
-        <p className="mt-2 leading-relaxed">{insight}</p>
+        <p className="leading-relaxed">{insight}</p>
       </div>
       <div style={{ height: chartHeight }} className="w-full">
         <ResponsiveContainer width="100%" height="100%">
@@ -1112,7 +1099,7 @@ function SurveyApp() {
       <div className="min-h-screen bg-grid bg-ink text-snow">
         <div className="mx-auto flex max-w-3xl flex-col items-center justify-center px-6 py-32 text-center">
           <div className="h-12 w-12 animate-spin rounded-full border-2 border-line border-t-accent" />
-          <p className="mt-6 text-sm text-mist">Gathering the latest group responses…</p>
+          <p className="mt-6 text-sm text-mist">Loading…</p>
         </div>
       </div>
     );
@@ -1126,7 +1113,7 @@ function SurveyApp() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-accent">
-                Anonymous class survey
+              Anonymous survey
             </p>
             <p className="text-sm text-mist">Rules for AI</p>
           </div>
@@ -1146,7 +1133,7 @@ function SurveyApp() {
                 onClick={() => navScroll("section-1")}
                 className="rounded-full border border-line px-4 py-2 text-sm text-mist transition hover:border-accent hover:text-snow"
               >
-                Jump to charts
+                Go to results
               </button>
             ) : null}
           </div>
@@ -1156,9 +1143,8 @@ function SurveyApp() {
       <main className="relative mx-auto max-w-6xl px-5 pb-24 pt-10">
         {usingFallback ? (
           <div className="mb-6 rounded-2xl border border-line bg-panel/70 px-4 py-3 text-sm text-mist">
-            Heads up: this preview is storing answers on this device only.
-            To share one combined set of results across classmates, run this app with the
-            server API enabled (for example on Render Web Service).
+            This copy of the page is saving responses only on this device. Use the class
+            link your instructor shared so answers from the whole class are stored together.
           </div>
         ) : null}
 
@@ -1181,8 +1167,8 @@ function SurveyApp() {
                 safety rules?
               </h1>
               <p className="mt-5 text-base leading-relaxed text-mist">
-                This is anonymous. No names, no email, no grades—just twelve tap-to-answer
-                questions so we can see where the class stands, then look at charts together.
+                This is anonymous. There are twelve multiple-choice or true/false questions.
+                After you submit, you will see combined results for the class.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <button
@@ -1261,13 +1247,9 @@ function SurveyApp() {
                             }`}
                           >
                             <span>{opt}</span>
-                            <span
-                              className={`font-mono text-xs ${
-                                active ? "text-accent" : "text-silver"
-                              }`}
-                            >
-                              {active ? "Selected" : "Choose"}
-                            </span>
+                            {active ? (
+                              <span className="font-mono text-xs text-accent">Selected</span>
+                            ) : null}
                           </button>
                         );
                       })
@@ -1336,7 +1318,7 @@ function SurveyApp() {
                   </p>
                   <h2 className="mt-3 text-4xl font-semibold md:text-5xl">Survey Results</h2>
                   <p className="mt-3 max-w-xl text-base text-mist">
-                    Here's how your classmates responded.
+                    Combined responses from the class so far.
                   </p>
                 </div>
                 <div className="flex flex-col items-start gap-3 md:items-end">
@@ -1368,14 +1350,14 @@ function SurveyApp() {
                   onClick={() => navScroll("section-2")}
                   className="rounded-full border border-line px-4 py-2 transition hover:border-accent hover:text-snow"
                 >
-                  Compare answers
+                  Compare questions
                 </button>
                 <button
                   type="button"
                   onClick={() => navScroll("section-3")}
                   className="rounded-full border border-line px-4 py-2 transition hover:border-accent hover:text-snow"
                 >
-                  Key takeaways
+                  Summary
                 </button>
               </div>
             </section>
@@ -1387,17 +1369,17 @@ function SurveyApp() {
                 id="section-1"
                 eyebrow="Section 1"
                 title="Individual question results"
-                subtitle="Each chart is a snapshot of the full class set so far."
+                subtitle="Counts for each question so far."
               />
               {!CHARTS_READY ? (
                 <div className="rounded-2xl border border-line bg-panel/70 px-4 py-3 text-sm text-mist">
-                  Charts could not load. Try a hard refresh. If this persists, your
-                  network may be blocking JavaScript—try another network or browser.
+                  Charts could not load. Try refreshing the page or using a different
+                  browser.
                 </div>
               ) : null}
               {responses.length === 0 ? (
                 <p className="text-sm text-mist">
-                  No responses yet. Be the first to take the survey.
+                  No responses yet.
                 </p>
               ) : CHARTS_READY ? (
                 <div className="grid gap-6 lg:grid-cols-2">
@@ -1427,8 +1409,8 @@ function SurveyApp() {
               <SectionHeading
                 id="section-2"
                 eyebrow="Section 2"
-                title="Correlation insights"
-                subtitle="These charts stack two questions together to see if patterns show up."
+                title="Comparing two questions"
+                subtitle="Each chart pairs two questions from the survey."
               />
               {CHARTS_READY ? (
               <div className="grid gap-8">
@@ -1467,7 +1449,7 @@ function SurveyApp() {
               </div>
               ) : (
                 <div className="rounded-2xl border border-line bg-panel/70 px-4 py-3 text-sm text-mist">
-                  Correlation charts are unavailable until the chart library loads.
+                  These charts could not load.
                 </div>
               )}
             </section>
@@ -1478,8 +1460,8 @@ function SurveyApp() {
               <SectionHeading
                 id="section-3"
                 eyebrow="Section 3"
-                title="Key takeaways"
-                subtitle="Short, plain-language bullets based on the most common answers right now."
+                title="Summary"
+                subtitle="Based on the most common answers in the results so far."
               />
               <ul className="space-y-4 rounded-3xl border border-line bg-panel/70 p-6 text-sm leading-relaxed text-mist md:p-8 md:text-base">
                 {takeaways.map((line, idx) => (

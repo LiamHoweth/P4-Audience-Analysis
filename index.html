@@ -124,12 +124,12 @@
           root.innerHTML =
             '<div style="min-height:100vh;background:#0c1018;color:#e8ecf4;padding:32px;font-family:system-ui,sans-serif;">' +
             '<div style="max-width:840px;margin:40px auto;border:1px solid #1e2636;background:#121826;padding:24px;border-radius:16px;">' +
-            '<p style="margin:0 0 10px 0;color:#00d4aa;font:600 12px ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;">Startup Error</p>' +
-            "<h1 style=\"margin:0 0 12px 0;font-size:24px;\">The survey did not load.</h1>" +
+            '<p style="margin:0 0 10px 0;color:#00d4aa;font:600 12px ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;">Load issue</p>' +
+            "<h1 style=\"margin:0 0 12px 0;font-size:24px;\">The page did not load.</h1>" +
             "<p style=\"margin:0 0 12px 0;color:#b6bac5;line-height:1.6;\">" +
             message +
             "</p>" +
-            "<p style=\"margin:0;color:#8b93a7;line-height:1.6;\">Try a hard refresh (Cmd+Shift+R). If this keeps happening, open DevTools Console and share the first red error line.</p>" +
+            "<p style=\"margin:0;color:#8b93a7;line-height:1.6;\">Try refreshing the page. If it still fails, try another browser or network.</p>" +
             "</div></div>";
         }
 
@@ -151,7 +151,7 @@
             showBootError(
               "Missing dependency script(s): " +
                 missing.join(", ") +
-                ". A network blocker or extension may be preventing CDN scripts from loading."
+                ". A browser extension or network filter may be blocking scripts."
             );
           }
         }, 2500);
