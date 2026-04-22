@@ -832,7 +832,9 @@ function CrosstabMiniHeatmap({ matrix, colOrder }) {
         </div>
       </div>
       <p className="mt-2 text-[11px] leading-relaxed text-mist">
-        Each cell is a count for that combination. Darker shading means a higher count.
+        Each cell is the number of people who chose that row and column together. Stronger
+        green means a higher count, scaled to the largest value in this table (zero stays
+        near the background color).
       </p>
     </div>
   );
