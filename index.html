@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- GitHub Pages (Project site): if charts/scripts fail to load, add a base tag pointing at your repo path, e.g. <base href="/p4-poll/" /> -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Class Survey — Rules for Artificial Intelligence</title>
+    <meta
+      name="description"
+      content="Anonymous classroom survey about rules for artificial intelligence, with live group results."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: "#0c1018",
+              panel: "#121826",
+              line: "#1e2636",
+              mist: "#8b93a7",
+              snow: "#e8ecf4",
+              accent: "#00d4aa",
+              accentDim: "#00a884",
+              igloo: "#383e4e",
+              silver: "#b6bac5",
+            },
+            fontFamily: {
+              sans: ["Outfit", "system-ui", "sans-serif"],
+              mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+            },
+            boxShadow: {
+              glow: "0 0 40px rgba(0, 212, 170, 0.12)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: Outfit, system-ui, sans-serif;
+      }
+      .bg-grid {
+        background-image: linear-gradient(
+            rgba(0, 212, 170, 0.04) 1px,
+            transparent 1px
+          ),
+          linear-gradient(90deg, rgba(0, 212, 170, 0.04) 1px, transparent 1px);
+        background-size: 48px 48px;
+      }
+      .soft-vignette {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(circle at 10% 10%, rgba(0, 212, 170, 0.14), transparent 34%),
+          radial-gradient(circle at 85% 18%, rgba(124, 108, 255, 0.12), transparent 30%),
+          radial-gradient(circle at 60% 90%, rgba(78, 198, 255, 0.08), transparent 38%);
+        mix-blend-mode: screen;
+        z-index: 0;
+      }
+      .floating-orb {
+        animation: drift 14s ease-in-out infinite;
+      }
+      .floating-orb-slow {
+        animation: drift 20s ease-in-out infinite reverse;
+      }
+      .card-sheen {
+        position: relative;
+        overflow: hidden;
+      }
+      .card-sheen::after {
+        content: "";
+        position: absolute;
+        inset: -120% auto auto -30%;
+        width: 60%;
+        height: 280%;
+        transform: rotate(20deg);
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.06) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        pointer-events: none;
+      }
+      @keyframes drift {
+        0%,
+        100% {
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+        50% {
+          transform: translate3d(0, -18px, 0) scale(1.02);
+        }
+      }
+    </style>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+  </head>
+  <body class="bg-ink text-snow antialiased">
+    <div id="root"></div>
+    <script>
+      (function () {
+        function showBootError(message) {
+          var root = document.getElementById("root");
+          if (!root) return;
+          root.innerHTML =
+            '<div style="min-height:100vh;background:#0c1018;color:#e8ecf4;padding:32px;font-family:system-ui,sans-serif;">' +
+            '<div style="max-width:840px;margin:40px auto;border:1px solid #1e2636;background:#121826;padding:24px;border-radius:16px;">' +
+            '<p style="margin:0 0 10px 0;color:#00d4aa;font:600 12px ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;">Startup Error</p>' +
+            "<h1 style=\"margin:0 0 12px 0;font-size:24px;\">The survey did not load.</h1>" +
+            "<p style=\"margin:0 0 12px 0;color:#b6bac5;line-height:1.6;\">" +
+            message +
+            "</p>" +
+            "<p style=\"margin:0;color:#8b93a7;line-height:1.6;\">Try a hard refresh (Cmd+Shift+R). If this keeps happening, open DevTools Console and share the first red error line.</p>" +
+            "</div></div>";
+        }
+
+        window.addEventListener("error", function (event) {
+          if (!event || !event.message) return;
+          showBootError("Browser error: " + event.message);
+        });
+
+        window.setTimeout(function () {
+          var root = document.getElementById("root");
+          if (!root) return;
+          if (root.children.length > 0) return;
+          var missing = [];
+          if (!window.React) missing.push("React");
+          if (!window.ReactDOM) missing.push("ReactDOM");
+          if (!window.Babel) missing.push("Babel");
+          if (!window.Recharts) missing.push("Recharts");
+          if (missing.length > 0) {
+            showBootError(
+              "Missing dependency script(s): " +
+                missing.join(", ") +
+                ". A network blocker or extension may be preventing CDN scripts from loading."
+            );
+          }
+        }, 2500);
+      })();
+    </script>
+    <script type="text/babel" data-presets="react" src="./survey.jsx"></script>
+  </body>
+</html>
